@@ -1,26 +1,41 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
+import { updateUser } from "./ducks/auth_reducer";
+import routes from "./routes";
+import axios from "axios";
+import Nav from "./components/Nav/Nav";
+import "./App.css";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  componentDidMount() {
+    axios
+      .get("/auth/current")
+      .then(res => {
+        this.props.updateUser(res.data);
+      })
+      .catch(err => {
+        console.log("Not logged in");
+      });
+  }
+
+  render() {
+    return (
+      <div className="App">
+        {this.props.id ? <Nav /> : null}
+        {routes}
+      </div>
+    );
+  }
 }
 
-export default App;
+function mapStateToProps(state) {
+  return {
+    id: state.authReducer.id
+  };
+}
+
+export default connect(
+  mapStateToProps,
+  { updateUser }
+)(withRouter(App));
